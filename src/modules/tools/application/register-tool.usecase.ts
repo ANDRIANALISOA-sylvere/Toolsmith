@@ -1,42 +1,30 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Tool, ToolType } from '../domain/tool.entity';
+import { Tool, ToolStatus, ToolType } from '../domain/tool.entity';
 import {
   TOOL_REPOSITORY,
   type ToolRepository,
 } from '../domain/tool.repositoty';
 import { ToolAlreadyExistsException } from '../domain/tools.error';
+import { randomUUID } from 'crypto';
 
 export interface RegisterToolInput {
   name: string;
-  description?: string;
+  description: string;
   type: ToolType;
   tenantId: string;
-  params?: {
-    name: string;
-    type: 'string' | 'number' | 'boolean';
-    required: boolean;
-    description?: string;
-  }[];
+  params?: object[];
   scriptContent?: string;
   webhookUrl?: string;
   webhookSecret?: string;
 }
 
-export interface RegisterToolOutput {
-  id: string;
-  name: string;
-  type: ToolType;
-  status: string;
-}
-
 @Injectable()
 export class RegisterToolUseCase {
   constructor(
-    @Inject(TOOL_REPOSITORY)
-    private readonly toolRepository: ToolRepository,
+    @Inject(TOOL_REPOSITORY) private readonly toolRepository: ToolRepository,
   ) {}
 
-  async execute(input: RegisterToolInput): Promise<RegisterToolOutput> {
+  async execute(input: RegisterToolInput) {
     const existing = await this.toolRepository.findByName(
       input.name,
       input.tenantId,
@@ -45,24 +33,21 @@ export class RegisterToolUseCase {
       throw new ToolAlreadyExistsException(input.name);
     }
 
-    const tool = Tool.create({
-      name: input.name,
-      description: input.description,
-      type: input.type,
-      tenantId: input.tenantId,
-      params: input.params ?? [],
-      scriptContent: input.scriptContent,
-      webhookUrl: input.webhookUrl,
-      webhookSecret: input.webhookSecret,
-    });
+    const tool = new Tool();
+    tool.id = randomUUID();
+    tool.name = input.name;
+    tool.description = input.description;
+    tool.type = input.type;
+    tool.status = ToolStatus.ACTIVE;
+    tool.tenantId = input.tenantId;
+    tool.params = input.params ?? [];
+    tool.scriptContent = input.scriptContent;
+    tool.webhookUrl = input.webhookUrl;
+    tool.webhookSecret = input.webhookSecret;
+    tool.createdAt = new Date();
 
     await this.toolRepository.save(tool);
 
-    return {
-      id: tool.id,
-      name: tool.name,
-      type: tool.type,
-      status: tool.status,
-    };
+    return tool;
   }
 }

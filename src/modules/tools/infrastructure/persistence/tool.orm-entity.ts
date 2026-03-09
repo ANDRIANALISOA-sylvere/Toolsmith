@@ -5,42 +5,42 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { ToolStatus, ToolType } from '../../domain/tool.entity';
+import { Tool, ToolStatus, ToolType } from '../../domain/tool.entity';
 
 @Entity('tools')
-export class ToolOrmEntity {
+export class ToolOrmEntity extends Tool {
   @PrimaryColumn('uuid')
-  id: string;
+  declare id: string;
 
   @Column()
-  name: string;
+  declare name: string;
 
   @Column({ type: 'text', nullable: true })
-  description?: string;
+  declare description?: string;
 
   @Column({ type: 'enum', enum: ToolType })
-  type: ToolType;
+  declare type: ToolType;
 
   @Column({ type: 'enum', enum: ToolStatus, default: ToolStatus.ACTIVE })
-  status: ToolStatus;
+  declare status: ToolStatus;
 
   @Column('uuid')
-  tenantId: string;
+  declare tenantId: string;
 
   @Column({ type: 'jsonb', default: [] })
-  params: object[];
+  declare params: object[];
 
   @Column({ type: 'text', nullable: true })
-  scriptContent?: string;
+  declare scriptContent?: string;
 
   @Column({ nullable: true })
-  webhookUrl?: string;
+  declare webhookUrl?: string;
 
   @Column({ nullable: true })
-  webhookSecret?: string;
+  declare webhookSecret?: string;
 
   @CreateDateColumn()
-  createdAt: Date;
+  declare createdAt: Date;
 
   @UpdateDateColumn()
   updatedAt: Date;
