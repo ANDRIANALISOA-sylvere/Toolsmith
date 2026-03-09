@@ -70,7 +70,7 @@ export class Tool {
     return new Tool(props);
   }
 
-  static reconstitue(
+  static reconstitute(
     props: CreateToolProps & { status: ToolStatus },
     id: string,
   ): Tool {
@@ -112,7 +112,7 @@ export class Tool {
   get type(): ToolType {
     return this._type;
   }
-  get status(): ToolStatus | undefined {
+  get status(): ToolStatus {
     return this._status;
   }
   get tenantId(): string {
