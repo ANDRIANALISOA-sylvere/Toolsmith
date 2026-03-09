@@ -13,7 +13,10 @@ import {
 import { RegisterToolUseCase } from '../application/register-tool.usecase';
 import { GetToolsUseCase } from '../application/get-tools.usecase';
 import { CreateToolDto } from './dto/create-tool.dto';
-import { ToolAlreadyExistsException, ToolNotFoundException } from '../domain/tools.error';
+import {
+  ToolAlreadyExistsException,
+  ToolNotFoundException,
+} from '../domain/tools.error';
 
 const TEMP_TENANT_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 @Controller('tools')
@@ -27,10 +30,7 @@ export class ToolsController {
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() dto: CreateToolDto) {
     try {
-      return await this.registerToolUseCase.execute({
-        ...dto,
-        tenantId: TEMP_TENANT_ID,
-      });
+      return await this.registerToolUseCase.execute(dto);
     } catch (error) {
       if (error instanceof ToolAlreadyExistsException) {
         throw new ConflictException(error.message);

@@ -9,7 +9,7 @@ import { randomUUID } from 'crypto';
 
 export interface RegisterToolInput {
   name: string;
-  description: string;
+  description?: string;
   type: ToolType;
   tenantId: string;
   params?: object[];
