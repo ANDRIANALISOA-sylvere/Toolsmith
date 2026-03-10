@@ -8,6 +8,14 @@ export enum ToolStatus {
   DISABLED = 'disabled',
 }
 
+export enum WebhookMethod {
+  GET = 'GET',
+  POST = 'POST',
+  PUT = 'PUT',
+  PATCH = 'PATCH',
+  DELETE = 'DELETE',
+}
+
 export class Tool {
   id: string;
   name: string;
@@ -19,6 +27,7 @@ export class Tool {
   scriptContent?: string;
   webhookUrl?: string;
   webhookSecret?: string;
+  webhookMethod?: WebhookMethod;
   createdAt: Date;
 
   isActive(): boolean {

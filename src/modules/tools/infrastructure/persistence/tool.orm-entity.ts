@@ -5,7 +5,12 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Tool, ToolStatus, ToolType } from '../../domain/tool.entity';
+import {
+  Tool,
+  ToolStatus,
+  ToolType,
+  WebhookMethod,
+} from '../../domain/tool.entity';
 
 @Entity('tools')
 export class ToolOrmEntity extends Tool {
@@ -23,6 +28,14 @@ export class ToolOrmEntity extends Tool {
 
   @Column({ type: 'enum', enum: ToolStatus, default: ToolStatus.ACTIVE })
   declare status: ToolStatus;
+
+  @Column({
+    type: 'enum',
+    enum: WebhookMethod,
+    default: WebhookMethod.POST,
+    nullable: true,
+  })
+  declare webhookMethod?: WebhookMethod;
 
   @Column('uuid')
   declare tenantId: string;

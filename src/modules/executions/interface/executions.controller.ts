@@ -11,6 +11,8 @@ import {
 import { RunToolUseCase } from '../application/run-tool.usecase';
 import { PgExecutionRepository } from '../infrastructure/persistence/pg-execution.repository';
 import { RunToolDto } from './dto/run-tool.dto';
+import { GetExecutionUseCase } from '../application/get-execution.usecase';
+import { ExecutionNotFoundException } from '../domain/execution.errors';
 
 const TEMP_TENANT_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 const TEMP_USER_ID = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
@@ -19,7 +21,7 @@ const TEMP_USER_ID = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
 export class ExecutionsController {
   constructor(
     private readonly runToolUseCase: RunToolUseCase,
-    private readonly executionRepository: PgExecutionRepository,
+    private readonly getExecutionUseCase: GetExecutionUseCase,
   ) {}
 
   @Post()
@@ -35,13 +37,18 @@ export class ExecutionsController {
 
   @Get()
   async findAll() {
-    return this.executionRepository.findByTenant(TEMP_TENANT_ID);
+    return this.getExecutionUseCase.findByTenant(TEMP_TENANT_ID);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    const execution = await this.executionRepository.findById(id);
-    if (!execution) throw new NotFoundException(`Execution ${id} not found`);
-    return execution;
+    try {
+      return this.getExecutionUseCase.findById(id);
+    } catch (error) {
+      if (error instanceof ExecutionNotFoundException) {
+        throw new NotFoundException(error.message);
+      }
+      throw error;
+    }
   }
 }

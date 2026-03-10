@@ -6,7 +6,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { ToolType } from '../../domain/tool.entity';
+import { ToolType, WebhookMethod } from '../../domain/tool.entity';
 import { Type } from 'class-transformer';
 
 class ToolParamDto {
@@ -43,6 +43,10 @@ export class CreateToolDto {
   @ValidateNested({ each: true })
   @Type(() => ToolParamDto)
   params?: ToolParamDto[];
+
+  @IsEnum(WebhookMethod)
+  @IsOptional()
+  webhookMethod?: WebhookMethod;
 
   @IsString()
   @IsOptional()

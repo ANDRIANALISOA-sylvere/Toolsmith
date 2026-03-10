@@ -16,7 +16,6 @@ export interface RunResult {
 
 @Injectable()
 export class ToolRunnerService {
-
   async run(tool: Tool, params: Record<string, unknown>): Promise<RunResult> {
     if (tool.type === ToolType.WEBHOOK) {
       return this.runWebhook(tool, params);
@@ -29,15 +28,22 @@ export class ToolRunnerService {
     params: Record<string, unknown>,
   ): Promise<RunResult> {
     try {
-      const response = await fetch(tool.webhookUrl, {
-        method: 'POST',
+      const method = tool.webhookMethod ?? 'POST';
+      const isGet = method === 'GET';
+
+      const url = isGet
+        ? `${tool.webhookUrl}?${new URLSearchParams(params as Record<string, string>)}`
+        : tool.webhookUrl!;
+
+      const response = await fetch(url, {
+        method,
         headers: {
           'Content-Type': 'application/json',
           ...(tool.webhookSecret && {
             Authorization: `Bearer ${tool.webhookSecret}`,
           }),
         },
-        body: JSON.stringify(params),
+        ...(!isGet && { body: JSON.stringify(params) }),
       });
 
       const text = await response.text();

@@ -7,12 +7,14 @@ import { RunToolUseCase } from './application/run-tool.usecase';
 import { ToolRunnerService } from './infrastructure/runner/tool-runner.service';
 import { PgExecutionRepository } from './infrastructure/persistence/pg-execution.repository';
 import { EXECUTION_REPOSITORY } from './domain/execution.repository';
+import { GetExecutionUseCase } from './application/get-execution.usecase';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ExecutionOrmEntity]), ToolsModule],
   controllers: [ExecutionsController],
   providers: [
     RunToolUseCase,
+    GetExecutionUseCase,
     ToolRunnerService,
     PgExecutionRepository,
     {
