@@ -18,5 +18,11 @@ import { PgToolRepository } from './infrastructure/persistence/pg-tool.repositor
       useClass: PgToolRepository,
     },
   ],
+  exports: [
+    {
+      provide: TOOL_REPOSITORY,
+      useClass: PgToolRepository,
+    },
+  ],
 })
 export class ToolsModule {}
