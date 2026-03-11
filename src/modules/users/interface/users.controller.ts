@@ -14,11 +14,11 @@ import { UserAlreadyExistsException } from '../domain/user.errors';
 import { TenantNotFoundException } from 'src/modules/tenants/domain/tenant.errors';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
-import { Roles } from 'src/shared/guards/decorators/roles.decorator';
+import { Roles } from 'src/shared/decorators/roles.decorator';
 import {
   CurrentUser,
   type CurrentUserData,
-} from 'src/shared/guards/decorators/current-user.decorator';
+} from 'src/shared/decorators/current-user.decorator';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)

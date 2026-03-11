@@ -20,11 +20,11 @@ import {
 } from '../domain/tools.error';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
-import { Roles } from 'src/shared/guards/decorators/roles.decorator';
+import { Roles } from 'src/shared/decorators/roles.decorator';
 import {
   CurrentUser,
   type CurrentUserData,
-} from 'src/shared/guards/decorators/current-user.decorator';
+} from 'src/shared/decorators/current-user.decorator';
 
 @Controller('tools')
 @UseGuards(JwtAuthGuard, RolesGuard)
