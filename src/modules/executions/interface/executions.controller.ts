@@ -10,7 +10,6 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { RunToolUseCase } from '../application/run-tool.usecase';
-import { PgExecutionRepository } from '../infrastructure/persistence/pg-execution.repository';
 import { RunToolDto } from './dto/run-tool.dto';
 import { GetExecutionUseCase } from '../application/get-execution.usecase';
 import { ExecutionNotFoundException } from '../domain/execution.errors';
@@ -21,6 +20,7 @@ import {
   CurrentUser,
   type CurrentUserData,
 } from 'src/shared/decorators/current-user.decorator';
+import { UserRole } from 'src/modules/users/domain/user.entity';
 
 @Controller('executions')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -30,8 +30,9 @@ export class ExecutionsController {
     private readonly getExecutionUseCase: GetExecutionUseCase,
   ) {}
 
+  @Post()
   @HttpCode(HttpStatus.CREATED)
-  @Roles('admin', 'developer', 'operator')
+  @Roles(UserRole.ADMIN, UserRole.DEVELOPER, UserRole.OPERATOR)
   async run(@Body() dto: RunToolDto, @CurrentUser() user: CurrentUserData) {
     return this.runToolUseCase.execute({
       toolId: dto.toolId,

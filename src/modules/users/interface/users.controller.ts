@@ -19,6 +19,7 @@ import {
   CurrentUser,
   type CurrentUserData,
 } from 'src/shared/decorators/current-user.decorator';
+import { UserRole } from '../domain/user.entity';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -26,7 +27,7 @@ export class UserController {
   constructor(private readonly inviteUserUseCase: InviteUserUseCase) {}
 
   @Post('invite')
-  @Roles('admin')
+  @Roles(UserRole.ADMIN)
   @HttpCode(HttpStatus.CREATED)
   async invite(
     @Body() dto: InviteUserDto,
