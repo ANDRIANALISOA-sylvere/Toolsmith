@@ -6,25 +6,36 @@ import {
   HttpStatus,
   NotFoundException,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { InviteUserUseCase } from '../application/invite-user.usecase';
 import { InviteUserDto } from './dto/invite-user.dto';
 import { UserAlreadyExistsException } from '../domain/user.errors';
 import { TenantNotFoundException } from 'src/modules/tenants/domain/tenant.errors';
-
-const TEMP_TENANT_ID = '8dc19d7d-f8d5-4a41-af75-fdf052e847fd';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { Roles } from 'src/shared/guards/decorators/roles.decorator';
+import {
+  CurrentUser,
+  type CurrentUserData,
+} from 'src/shared/guards/decorators/current-user.decorator';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class UserController {
   constructor(private readonly inviteUserUseCase: InviteUserUseCase) {}
 
   @Post('invite')
+  @Roles('admin')
   @HttpCode(HttpStatus.CREATED)
-  async invite(@Body() dto: InviteUserDto) {
+  async invite(
+    @Body() dto: InviteUserDto,
+    @CurrentUser() user: CurrentUserData,
+  ) {
     try {
       return await this.inviteUserUseCase.execute({
         ...dto,
-        tenantId: TEMP_TENANT_ID,
+        tenantId: user.tenantId,
       });
     } catch (error) {
       if (error instanceof UserAlreadyExistsException) {

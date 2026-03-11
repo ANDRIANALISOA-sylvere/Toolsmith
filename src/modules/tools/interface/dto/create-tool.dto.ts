@@ -32,9 +32,6 @@ export class CreateToolDto {
   @IsOptional()
   description?: string;
 
-  @IsString()
-  tenantId: string;
-
   @IsEnum(ToolType)
   type: ToolType;
 

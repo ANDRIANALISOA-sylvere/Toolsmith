@@ -9,6 +9,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { RegisterToolUseCase } from '../application/register-tool.usecase';
 import { GetToolsUseCase } from '../application/get-tools.usecase';
@@ -17,9 +18,16 @@ import {
   ToolAlreadyExistsException,
   ToolNotFoundException,
 } from '../domain/tools.error';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { Roles } from 'src/shared/guards/decorators/roles.decorator';
+import {
+  CurrentUser,
+  type CurrentUserData,
+} from 'src/shared/guards/decorators/current-user.decorator';
 
-const TEMP_TENANT_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
 @Controller('tools')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ToolsController {
   constructor(
     private readonly registerToolUseCase: RegisterToolUseCase,
@@ -28,9 +36,16 @@ export class ToolsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() dto: CreateToolDto) {
+  @Roles('admin', 'developer')
+  async create(
+    @Body() dto: CreateToolDto,
+    @CurrentUser() user: CurrentUserData,
+  ) {
     try {
-      return await this.registerToolUseCase.execute(dto);
+      return await this.registerToolUseCase.execute({
+        ...dto,
+        tenantId: user.tenantId,
+      });
     } catch (error) {
       if (error instanceof ToolAlreadyExistsException) {
         throw new ConflictException(error.message);
@@ -45,14 +60,14 @@ export class ToolsController {
   }
 
   @Get()
-  async findAll() {
-    return this.getToolsUseCase.getAll(TEMP_TENANT_ID);
+  async findAll(@CurrentUser() user: CurrentUserData) {
+    return this.getToolsUseCase.getAll(user.tenantId);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string, @CurrentUser() user: CurrentUserData) {
     try {
-      return await this.getToolsUseCase.getOne(id, TEMP_TENANT_ID);
+      return await this.getToolsUseCase.getOne(id, user.tenantId);
     } catch (e) {
       if (e instanceof ToolNotFoundException) {
         throw new NotFoundException(e.message);

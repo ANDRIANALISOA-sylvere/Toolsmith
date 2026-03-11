@@ -7,37 +7,43 @@ import {
   NotFoundException,
   Param,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { RunToolUseCase } from '../application/run-tool.usecase';
 import { PgExecutionRepository } from '../infrastructure/persistence/pg-execution.repository';
 import { RunToolDto } from './dto/run-tool.dto';
 import { GetExecutionUseCase } from '../application/get-execution.usecase';
 import { ExecutionNotFoundException } from '../domain/execution.errors';
-
-const TEMP_TENANT_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
-const TEMP_USER_ID = 'b1eebc99-9c0b-4ef8-bb6d-6bb9bd380a22';
+import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
+import { RolesGuard } from 'src/shared/guards/roles.guard';
+import { Roles } from 'src/shared/guards/decorators/roles.decorator';
+import {
+  CurrentUser,
+  type CurrentUserData,
+} from 'src/shared/guards/decorators/current-user.decorator';
 
 @Controller('executions')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ExecutionsController {
   constructor(
     private readonly runToolUseCase: RunToolUseCase,
     private readonly getExecutionUseCase: GetExecutionUseCase,
   ) {}
 
-  @Post()
   @HttpCode(HttpStatus.CREATED)
-  async run(@Body() dto: RunToolDto) {
+  @Roles('admin', 'developer', 'operator')
+  async run(@Body() dto: RunToolDto, @CurrentUser() user: CurrentUserData) {
     return this.runToolUseCase.execute({
       toolId: dto.toolId,
-      tenantId: TEMP_TENANT_ID,
-      userId: TEMP_USER_ID,
+      tenantId: user.tenantId,
+      userId: user.userId,
       params: dto.params ?? {},
     });
   }
 
   @Get()
-  async findAll() {
-    return this.getExecutionUseCase.findByTenant(TEMP_TENANT_ID);
+  async findAll(@CurrentUser() user: CurrentUserData) {
+    return this.getExecutionUseCase.findByTenant(user.tenantId);
   }
 
   @Get(':id')
