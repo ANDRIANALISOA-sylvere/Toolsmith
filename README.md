@@ -1,98 +1,227 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Toolsmith
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+> Backend toolbox engine : centralize, execute and audit your internal developer tools.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Toolsmith is a multi-tenant SaaS platform that lets companies register, run, and audit internal operational tools (scripts, webhooks) from a single place ,without SSH access, without scattered repos, without losing track of who did what.
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## The Problem
 
-## Project setup
+In most backend teams, internal tools are a mess:
 
-```bash
-$ npm install
+- Scripts scattered across 5 different repos
+- No one knows which version is up to date
+- A dev runs a script in prod and no one knows about it
+- Zero audit trail ; who ran what, when, with which params?
+- Permissions? Managed manually, if at all
+
+**Toolsmith solves exactly that.**
+
+---
+
+## Features
+
+- **Multi-tenancy** : Each company has its own isolated workspace
+- **Tool Registry** : Register webhook or script tools with typed parameters
+- **Execution Engine** : Run tools with params, get results back
+- **Audit Log** : Every execution is logged (who, when, params, output, status)
+- **RBAC** : Admin / Developer / Operator roles
+- **Background Jobs** : Async execution with BullMQ + Redis (retry, backoff)
+- **User Management** : Admins invite team members, no public registration
+
+---
+
+## How It Works
+
+```
+1. Jumia (example) creates a Tenant account → POST /tenants/register
+2. Sylvère (admin) logs in        → POST /auth/login → JWT
+3. Sylvère invites his team       → POST /users/invite (admin only)
+4. Sylvère registers a tool       → POST /tools
+5. Hery (operator) runs the tool  → POST /executions
+6. Full audit trail saved         → GET  /executions
 ```
 
-## Compile and run the project
+### Tool Types
 
-```bash
-# development
-$ npm run start
+Type      | How it works                                          
+--------- | -----------------------------------------------------
+`webhook` | Toolsmith calls the company's API endpoint           
+`script`  | Toolsmith executes a JS script in an isolated process
 
-# watch mode
-$ npm run start:dev
+---
 
-# production mode
-$ npm run start:prod
+## Tech Stack
+
+| Layer        | Technology                            |
+| ------------ | ------------------------------------- |
+| Framework    | NestJS                                |
+| Database     | PostgreSQL + TypeORM                  |
+| Queue        | BullMQ + Redis                        |
+| Auth         | JWT + Passport                        |
+| Architecture | Modular Monolith + Clean Architecture |
+
+---
+
+## Architecture
+
+```
+src/
+├── modules/
+│   ├── tools/           # Tool registry
+│   │   ├── domain/
+│   │   ├── application/
+│   │   ├── infrastructure/
+│   │   └── interface/
+│   ├── executions/      # Execution engine + audit log
+│   ├── tenants/         # Company accounts
+│   └── users/           # Auth + team management
+└── shared/              # Guards, decorators, exceptions
 ```
 
-## Run tests
+Each module follows **Clean Architecture**:
+
+- `domain/` — business logic,
+- `application/` — use cases
+- `infrastructure/` — TypeORM, BullMQ, external runners
+- `interface/` — HTTP controllers, DTOs
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL
+- Redis
+
+### Installation
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+git clone https://github.com/ANDRIANALISOA-sylvere/Toolsmith
+cd Toolsmith
+npm install
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Environment
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# .env
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=postgres
+DB_DATABASE=toolsmith
+
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+JWT_SECRET=your-secret-key
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Run
 
-## Resources
+```bash
+# Development
+npm run start:dev
 
-Check out a few resources that may come in handy when working with NestJS:
+# Production
+npm run build
+npm run start:prod
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+## API
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### Auth
 
-## Stay in touch
+```bash
+# Create company account
+POST /tenants/register
+{
+  "tenantName": "Jumia Madagascar",
+  "slug": "jumia",
+  "adminName": "Sylvère",
+  "adminEmail": "sylvere@jumia.com",
+  "adminPassword": "password123"
+}
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Login
+POST /auth/login
+{ "email": "sylvere@jumia.com", "password": "password123" }
+# → { "accessToken": "eyJ..." }
+```
 
-## License
+### Users (Admin only)
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+# Invite a team member
+POST /users/invite
+Authorization: Bearer <token>
+{ "email": "hery@jumia.com", "name": "Hery", "role": "operator" }
+```
+
+### Tools
+
+```bash
+# Register a webhook tool
+POST /tools
+Authorization: Bearer <token>
+{
+  "name": "unlock-order",
+  "description": "Unblocks a stuck order",
+  "type": "webhook",
+  "webhookUrl": "https://api.jumia.com/internal/unlock",
+  "webhookMethod": "POST",
+  "params": [
+    { "name": "orderId", "type": "string", "required": true }
+  ]
+}
+
+# List all tools
+GET /tools
+Authorization: Bearer <token>
+```
+
+### Executions
+
+```bash
+# Run a tool
+POST /executions
+Authorization: Bearer <token>
+{ "toolId": "<uuid>", "params": { "orderId": "12345" } }
+
+# Get execution history
+GET /executions
+Authorization: Bearer <token>
+
+# Get one execution (check status)
+GET /executions/:id
+Authorization: Bearer <token>
+```
+
+---
+
+## Concepts Applied
+
+This project was built as a learning ground for production-grade backend architecture:
+
+- **Clean Architecture** : domain, application, infrastructure, interface layers
+- **Hexagonal Architecture** : ports & adapters
+- **Modular Monolith** : independent modules, single deployable unit
+- **Domain-Driven Design** : rich domain models, domain exceptions
+- **RBAC** : role-based access control with JWT
+- **Multi-tenancy** : full data isolation per tenant
+- **Background Jobs** : BullMQ with retry & exponential backoff
+- **Dependency Injection** : abstractions over implementations
+
+---
+
+## Author
+
+**Joséphin Sylvère Andrianalisoa** — [@ANDRIANALISOA-sylvere](https://github.com/ANDRIANALISOA-sylvere)
+
+> Built to learn. Designed to scale.
