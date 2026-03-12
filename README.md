@@ -220,8 +220,18 @@ This project was built as a learning ground for production-grade backend archite
 
 ---
 
+## Roadmap
+ 
+- [ ] Email notifications on execution failure
+- [ ] Cron job scheduler
+- [ ] WebSocket live logs
+- [ ] CLI: `toolsmith run <tool-name> --params`
+- [ ] Dashboard frontend (React)
+ 
+---
+
 ## Author
 
 **Joséphin Sylvère Andrianalisoa** — [@ANDRIANALISOA-sylvere](https://github.com/ANDRIANALISOA-sylvere)
 
-> Built to learn. Designed to scale.
+> Built to master Clean Architecture, Hexagonal Design, and multi-tenant SaaS patterns.
