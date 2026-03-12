@@ -220,6 +220,7 @@ This project was built as a learning ground for production-grade backend archite
 
 ---
 
+<!-- 
 ## Roadmap
  
 - [ ] Email notifications on execution failure
@@ -227,6 +228,7 @@ This project was built as a learning ground for production-grade backend archite
 - [ ] WebSocket live logs
 - [ ] CLI: `toolsmith run <tool-name> --params`
 - [ ] Dashboard frontend (React)
+-->
  
 ---
 
